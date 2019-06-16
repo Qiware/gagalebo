@@ -79,7 +79,7 @@ CREATE TABLE statistic
 
 ALTER TABLE statistic
 	ADD FOREIGN KEY (uid)
-	REFERENCES account (uid)
+	REFERENCES account (id)
 	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 ;
