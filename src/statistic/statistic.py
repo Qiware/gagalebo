@@ -29,28 +29,28 @@ def WatchVideoHandler(ctx, data):
             return (errno.ERR_VIDEO_ID_INVALID, "Video id is invalid")
 
         # 获取视频信息
-        vdata, code, message = video.GetVideoData(ctx, data["video_id"])
+        (vdata, code, message) = video.GetVideoData(ctx, data["video_id"])
         if vdata is None:
             logging.error("Get video data failed! video id:%d code:%d errmsg:%s" %
                     (data["video_id"], code, message))
             return (code, message)
 
         # 更新观看视频历史
-        code, message = video.UpdateVideoHistory(ctx, data["uid"], data["video_id"])
+        (code, message) = video.UpdateVideoHistory(ctx, data["uid"], data["video_id"])
         if errno.OK != code:
             logging.error("Update video history failed! video id:%d code:%d errmsg:%s" % 
                     (data["video_id"], code, message))
             return (code, message)
 
         # 更新单词学习统计
-        code, message = UpdateWordCount(ctx, data["uid"], vdata)
+        (code, message) = UpdateWordCount(ctx, data["uid"], vdata)
         if errno.OK != code:
             logging.error("Update word count failed! uid:%d video id:%d code:%d errmsg:%s" % 
                     (data["uid"], data["video_id"], code, message))
             return (code, message)
 
         # 更新统计信息表
-        code, message = UpdateStatistic(ctx, data["uid"], vdata["duration"])
+        (code, message) = UpdateStatistic(ctx, data["uid"], vdata["duration"])
         if errno.OK != code:
             logging.error("Update statistic table failed! uid:%d video id:%d code:%d errmsg:%s" % 
                     (data["uid"], data["video_id"], code, message))
@@ -80,7 +80,7 @@ def UpdateWordCount(ctx, uid, vdata):
         # 更新各单词学习统计次数
         for word in words.keys():
             num = words[word]
-            code, message = word.UpdateWordHistory(ctx, uid, word, num)
+            (code, message) = word.UpdateWordHistory(ctx, uid, word, num)
             if errno.OK != code:
                 logging.error("Update word history failed! uid:%d word:%s code:%d errmsg:%s" % 
                         (uid, word, code, message))
@@ -105,14 +105,14 @@ def UpdateWordCount(ctx, uid, vdata):
 def UpdateStatistic(ctx, uid, duration):
     try:
         # 获取累计学习视频数量
-        video_count, code, message = video.GetVideoCountFromRds(ctx, uid)
+        (video_count, code, message) = video.GetVideoCountFromRds(ctx, uid)
         if errno.OK != code:
             logging.error("Get video count from redis failed! uid:%d code:%d errmsg:%s" %
                     (uid, code, message))
             return (code, message)
 
         # 获取累计学习单词数量
-        word_count, code, message = video.GetWordCountFromRds(ctx, uid)
+        (word_count, code, message) = video.GetWordCountFromRds(ctx, uid)
         if errno.OK != code:
             logging.error("Get word count from redis failed! uid:%d code:%d errmsg:%s" %
                     (uid, code, message))
@@ -130,10 +130,10 @@ def UpdateStatistic(ctx, uid, duration):
             s = cur.fetchone()
             if s is None:
                 # 新建统计对象
-                sql = "
+                sql ='''
                     INSERT INTO
                         statistic(uid, time, videos, words, score)
-                    VALUES(%d, %d, %d, %d, %d)" % (uid, 0, 0, 0, 0)
+                    VALUES(%d, %d, %d, %d, %d)''' % (uid, 0, 0, 0, 0)
                 cur.execute(sql) 
                 cur.commit()
 
@@ -146,10 +146,10 @@ def UpdateStatistic(ctx, uid, duration):
             s["videos"] = video_count
             s["words"] = word_count
 
-            sql = "
+            sql = '''
                 UPDATE statistic
                 SET(time, videos, words)
-                VALUES(%d, %d, %d) WHERE uid='%d'" % (s["time"], s["videos"], s["words"], uid)
+                VALUES(%d, %d, %d) WHERE uid=%d''' % (s["time"], s["videos"], s["words"], uid)
 
             cur.execute(sql) 
             db.commit()

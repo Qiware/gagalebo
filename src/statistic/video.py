@@ -35,8 +35,7 @@ def GetVideoData(ctx, video_id):
         db.close()
         logging.error("Get data failed! video id:%d errmsg:%s" % (video_id, str(e)))
         return (None, errno.ERR_UNKNOWN, str(e))
-
-   return (None, errno.ERR_DATA_NOT_FOUND, "Get video data failed")
+    return (None, errno.ERR_DATA_NOT_FOUND, "Get video data failed")
 
 ################################################################################
 # 更新视频历史
@@ -51,7 +50,7 @@ def UpdateVideoHistory(ctx, uid, video_id):
     try:
         rds = ctx.GetRedis()
 
-        key = print(keys.RDS_KEY_USER_VIDEO_HISTORY % uid)
+        key = keys.RDS_KEY_USER_VIDEO_HISTORY % (uid)
 
         rds.zset(key, video_id, int(time.time()))
 
@@ -59,7 +58,6 @@ def UpdateVideoHistory(ctx, uid, video_id):
     except Exception, e:
         logging.error("Update video history failed! uid:%d video_id:%d e:%s" % (uid, video_id, str(e)))
         return (errno.ERR_UNKNOWN, str(e))
-
     return (errno.ERR_UNKNOWN, "Update video history failed")
 
 ################################################################################
@@ -72,7 +70,8 @@ def UpdateVideoHistory(ctx, uid, video_id):
 #   code: 错误码
 #   message: 错误描述
 def GetVideoCountFromRds(ctx, uid):
-    key = print(keys.RDS_KEY_USER_VIDEO_HISTORY % uid)
+    key = keys.RDS_KEY_USER_VIDEO_HISTORY % (uid)
+
     try:
         rds = ctx.GetRedis()
 
@@ -80,6 +79,6 @@ def GetVideoCountFromRds(ctx, uid):
 
         return (count, errno.OK, "Ok")
     except Exception, e:
-        logging.error("Get video count from redis failed! uid:%d e:%s" % (uid, str(e))
-        return (0, errno.ERR_UNKNOWN, str(e)) 
-    return (0, errno.ERR_UNKNOWN, str(e)) 
+        logging.error("Get video count from redis failed! uid:%d e:%s" % (uid, str(e)))
+        return (0, errno.ERR_UNKNOWN, str(e))
+    return (0, errno.ERR_UNKNOWN, "Get video count from redis failed!")

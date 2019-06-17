@@ -28,7 +28,7 @@ if __name__ == "__main__":
             # 判断消息类型
             if data["id"] == statistic.DATA_TYPE_WATCH_VIDEO: # 观看视频统计
                 if data.has_key("data"):
-                    code, message = statistic.WatchVideoHandler(ctx, json.loads(data["data"]))
+                    (code, message) = statistic.WatchVideoHandler(ctx, json.loads(data["data"]))
                     if errno.OK != code:
                         logging.error("Watch video handler failed! code:%d errmsg:%s" % (code, message))
                     continue
