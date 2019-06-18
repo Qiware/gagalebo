@@ -43,10 +43,11 @@ def CreateVideo():
             return
 
         # 分析字幕信息
-        (code, message) = AnalyzeWordScript(v)
+        (w, code, message) = word.StatisticWord(ctx, v.words_script)
         if errno.OK != code:
             logging.error("Analyze word script failed! code:%d message:%s" % (code, message))
             return
+        v.words = json.dumps(w)
 
         # 新建视频资源
         (code, message) = video.CreateVideo(v)

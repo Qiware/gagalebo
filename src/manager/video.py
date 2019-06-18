@@ -19,31 +19,6 @@ class Video():
         definition = "360p" # 字幕
 
 ################################################################################
-# 获取视频信息
-# @param
-#   v: 视频数据(表: video对象)
-# @return
-#   code: 错误码
-#   message: 错误描述
-def AnalyzeWordScript(ctx, v):
-    try:
-        m = dict({})
-        sentences = ctx.tokenizer.tokenize(v.words_script)
-        for idx, sentence in enumerate(sentences):
-            words = ntk.tokenize.WordPunctTokenizer().tokenize(sentence)
-            for idx, word  in enumerate(words):
-                if m.has_key(word):
-                    m[word] += 1
-                else:
-                    m[word] = 1
-        v.words = json.dumps(m)
-        return (errno.OK, "Ok")
-    except Exception as e:
-        loggin.error("Analyze word script failed! e:%s" % str(e))
-        return (errno.ERR_UNKNOWN, "Analyze word script failed!")
-    return (errno.ERR_UNKNOWN, "Analyze word script failed!")
-
-################################################################################
 # 新建视频信息
 # @param
 #   ctx: 全局对象
