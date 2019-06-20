@@ -29,7 +29,8 @@ def UpdateWordHistory(ctx, uid, word, num):
 
         return (errno.OK, "Ok")
     except Exception, e:
-        logging.error("Update word history failed! uid:%d word:%s e:%s" % (uid, word, str(e)))
+        logging.error("[%s][%d] Update word history failed! uid:%d word:%s e:%s"
+                % (__file__, sys._getframe().f_lineno, uid, word, str(e)))
         return (errno.ERR_UNKNOWN, str(e))
 
     return (errno.ERR_UNKNOWN, "Update word history failed")
@@ -54,7 +55,8 @@ def GetWordCountFromRds(ctx, uid):
 
         return (count, errno.OK, "Ok")
     except Exception, e:
-        logging.error("Get word count from redis failed! uid:%d e:%s" % (uid, str(e)))
+        logging.error("[%s][%d] Get word count from redis failed! uid:%d e:%s"
+                % (__file__, sys._getframe().f_lineno, uid, str(e)))
         return (0, errno.ERR_UNKNOWN, str(e))
 
     return (0, errno.ERR_UNKNOWN, "Get word count from redis failed")

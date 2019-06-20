@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*- 
 
+import nltk
+import logging
+
+import errno
+
 ################################################################################
 # 统计段落中的各单词数
 # @param
@@ -13,7 +18,7 @@ def StatisticWord(ctx, paragraph):
         m = {}
         sentences = ctx.tokenizer.tokenize(paragraph)
         for idx, sentence in enumerate(sentences):
-            words = ntk.tokenize.WordPunctTokenizer().tokenize(sentence)
+            words = nltk.tokenize.WordPunctTokenizer().tokenize(sentence)
             for word  in words:
                 if not word.isalpha():
                     # 单词中存在'非字母'的字符, 判定为非法单词.
@@ -24,6 +29,7 @@ def StatisticWord(ctx, paragraph):
                     m[word] = 1
         return (m, errno.OK, "Ok")
     except Exception as e:
-        loggin.error("Analyze word script failed! e:%s" % str(e))
+        logging.error("[%s][%d] Analyze word script failed! e:%s"
+                % (__file__, sys._getframe().f_lineno, str(e)))
         return (None, errno.ERR_UNKNOWN, "Analyze word script failed!")
     return (None, errno.ERR_UNKNOWN, "Analyze word script failed!")

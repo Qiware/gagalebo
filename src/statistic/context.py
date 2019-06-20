@@ -7,16 +7,16 @@ import MySQLdb
 from DBUtils.PooledDB import PooledDB, SharedDBConnection
 
 # REDIS配置信息
-REDIS_HOST = "127.0.0.1"
+REDIS_HOST = "10.11.178.43"
 REDIS_PORT = 6379
-REDIS_PASSWD = "123456"
+REDIS_PASSWD = ""
 REDIS_DB = 0
 
 # MYSQL配置信息
-MYSQL_HOST = "127.0.0.1"
+MYSQL_HOST = "10.11.178.43"
 MYSQL_PORT = 3306
-MYSQL_USER = "admin"
-MYSQL_PASSWD = "123456"
+MYSQL_USER = "useradmin"
+MYSQL_PASSWD = "adminpassword"
 MYSQL_DB = "gagalebo"
 
 
@@ -25,14 +25,14 @@ class Context():
     # 初始化
     def __init__(self):
         # 构建REDIS连接池
-        rds_pool = redis.ConnectionPool(
+        self.rds_pool = redis.ConnectionPool(
                 host=REDIS_HOST,
                 password=REDIS_PASSWD,
                 port=REDIS_PORT,
                 db=REDIS_DB);
 
         # 构建MYSQL连接池
-        db_pool = PooledDB(
+        self.db_pool = PooledDB(
                 creator = MySQLdb,  #使用链接数据库的模块
                 maxconnections = 6, #连接池允许的最大连接数，0和None表示没有限制
                 mincached = 2,      #初始化时，连接池至少创建的空闲的连接，0表示不创建
@@ -49,8 +49,8 @@ class Context():
                 charset = 'utf8')
     # 获取一个Redis连接
     def GetRedis(self):
-        return ctx.rds_pool.Redis()
+        return redis.Redis(connection_pool = self.rds_pool)
     # 获取一个DB连接
     def GetDbConn(self):
-        return ctx.db_pool.connection()
+        return self.db_pool.connection()
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*- 
 
+import sys
 import time
 import nltk
 import json
@@ -45,7 +46,8 @@ def CreateVideo(ctx, v):
     except Exception, e:
         cur.close()
         db.close()
-        logging.error("Get data failed! video id:%d errmsg:%s" % (video_id, str(e)))
+        logging.error("[%d][%s] Get data failed! video id:%d errmsg:%s"
+                % (__file__, sys._getframe().f_lineno, video_id, str(e)))
         return (None, errno.ERR_UNKNOWN, str(e))
     return (None, errno.ERR_DATA_NOT_FOUND, "Get video data failed")
 
@@ -77,7 +79,8 @@ def GetVideoData(ctx, video_id):
     except Exception, e:
         cur.close()
         db.close()
-        logging.error("Get data failed! video id:%d errmsg:%s" % (video_id, str(e)))
+        logging.error("[%s][%d] Get data failed! video id:%d errmsg:%s"
+                % (__file__, sys._getframe().f_lineno, video_id, str(e)))
         return (None, errno.ERR_UNKNOWN, str(e))
     return (None, errno.ERR_DATA_NOT_FOUND, "Get video data failed")
 

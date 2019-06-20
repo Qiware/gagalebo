@@ -33,7 +33,8 @@ def GetVideoData(ctx, video_id):
     except Exception, e:
         cur.close()
         db.close()
-        logging.error("Get data failed! video id:%d errmsg:%s" % (video_id, str(e)))
+        logging.error("[%s][%d] Get data failed! video id:%d errmsg:%s"
+                % (__file__, sys._getframe().f_lineno, video_id, str(e)))
         return (None, errno.ERR_UNKNOWN, str(e))
     return (None, errno.ERR_DATA_NOT_FOUND, "Get video data failed")
 
@@ -43,20 +44,22 @@ def GetVideoData(ctx, video_id):
 #   ctx: 全局对象
 #   uid: 用户ID
 #   video_id: 视频ID
+#   play_time: 视频播放时间
 # @return
 #   code: 错误码
 #   message: 错误描述
-def UpdateVideoHistory(ctx, uid, video_id):
+def UpdateVideoHistory(ctx, uid, video_id, play_time):
     try:
         rds = ctx.GetRedis()
 
         key = keys.RDS_KEY_USER_VIDEO_HISTORY % (uid)
 
-        rds.zset(key, video_id, int(time.time()))
+        rds.zset(key, video_id, play_time)
 
         return (errno.OK, "Ok")
     except Exception, e:
-        logging.error("Update video history failed! uid:%d video_id:%d e:%s" % (uid, video_id, str(e)))
+        logging.error("[%s][%d] Update video history failed! uid:%d video_id:%d play_time:%d e:%s"
+                % (__file__, sys._getframe().f_lineno, uid, video_id, play_time, str(e)))
         return (errno.ERR_UNKNOWN, str(e))
     return (errno.ERR_UNKNOWN, "Update video history failed")
 
@@ -79,6 +82,7 @@ def GetVideoCountFromRds(ctx, uid):
 
         return (count, errno.OK, "Ok")
     except Exception, e:
-        logging.error("Get video count from redis failed! uid:%d e:%s" % (uid, str(e)))
+        logging.error("[%s][%d] Get video count from redis failed! uid:%d e:%s"
+                % (__file__, sys._getframe().f_lineno, uid, str(e)))
         return (0, errno.ERR_UNKNOWN, str(e))
     return (0, errno.ERR_UNKNOWN, "Get video count from redis failed!")
