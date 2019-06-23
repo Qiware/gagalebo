@@ -7,17 +7,17 @@ import json
 import logging
 
 import keys
-import errno
+import comm
 
 class Video():
     def __init__(self):
-        name_en = ""        # 英文名称
-        name_ch = ""        # 中文名称
-        poster = ""         # 缩略图URL
-        duration = ""       # 视频长度(秒)
-        url = ""            # 播放地址
-        words_script = ""   # 字幕
-        definition = "360p" # 字幕
+        self.name_en = ""        # 英文名称
+        self.name_ch = ""        # 中文名称
+        self.poster = ""         # 缩略图URL
+        self.duration = ""       # 视频长度(秒)
+        self.url = ""            # 播放地址
+        self.words_script = ""   # 字幕
+        self.definition = "360p" # 字幕
 
 ################################################################################
 # 新建视频信息
@@ -34,7 +34,9 @@ def CreateVideo(ctx, v):
     sql = '''
         INSERT INTO
             video(name_en, name_ch, poster, duration, url, words_script, words, definition)
-        VALUES(%s, %s, %s, %d, %s, %s, %s, %s)''' % (v.name_en, v.name_ch, v.poster, v.duration, v.url, v.words_script, v.words, v.definition)
+        VALUES('%s', '%s', '%s', %d, '%s', '%s', '%s', '%s')''' % (v.name_en, v.name_ch, v.poster, v.duration, v.url, v.words_script, v.words, v.definition)
+
+    logging.error("[%s][%d] sql:%s" % (__file__, sys._getframe().f_lineno, sql))
 
     try:
         cur.execute(sql) 
@@ -42,14 +44,14 @@ def CreateVideo(ctx, v):
         cur.close()
         db.close()
 
-        return (data, errno.OK, "Ok")
+        return (comm.OK, "Ok")
     except Exception, e:
         cur.close()
         db.close()
-        logging.error("[%d][%s] Get data failed! video id:%d errmsg:%s"
-                % (__file__, sys._getframe().f_lineno, video_id, str(e)))
-        return (None, errno.ERR_UNKNOWN, str(e))
-    return (None, errno.ERR_DATA_NOT_FOUND, "Get video data failed")
+        logging.error("[%s][%d] Create video data failed! name(en):%s errmsg:%s"
+                % (__file__, sys._getframe().f_lineno, v.name_en, str(e)))
+        return (comm.ERR_UNKNOWN, str(e))
+    return (comm.ERR_DATA_NOT_FOUND, "Create video data failed")
 
 
 ################################################################################
@@ -75,13 +77,13 @@ def GetVideoData(ctx, video_id):
         cur.close()
         db.close()
 
-        return (data, errno.OK, "Ok")
+        return (data, comm.OK, "Ok")
     except Exception, e:
         cur.close()
         db.close()
         logging.error("[%s][%d] Get data failed! video id:%d errmsg:%s"
                 % (__file__, sys._getframe().f_lineno, video_id, str(e)))
-        return (None, errno.ERR_UNKNOWN, str(e))
-    return (None, errno.ERR_DATA_NOT_FOUND, "Get video data failed")
+        return (None, comm.ERR_UNKNOWN, str(e))
+    return (None, comm.ERR_DATA_NOT_FOUND, "Get video data failed")
 
 

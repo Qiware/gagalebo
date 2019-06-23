@@ -3,7 +3,7 @@
 import nltk
 import logging
 
-import errno
+import comm
 
 ################################################################################
 # 统计段落中的各单词数
@@ -23,13 +23,14 @@ def StatisticWord(ctx, paragraph):
                 if not word.isalpha():
                     # 单词中存在'非字母'的字符, 判定为非法单词.
                     continue
+                word = word.lower()
                 if m.has_key(word):
                     m[word] += 1
                 else:
                     m[word] = 1
-        return (m, errno.OK, "Ok")
+        return (m, comm.OK, "Ok")
     except Exception as e:
         logging.error("[%s][%d] Analyze word script failed! e:%s"
                 % (__file__, sys._getframe().f_lineno, str(e)))
-        return (None, errno.ERR_UNKNOWN, "Analyze word script failed!")
-    return (None, errno.ERR_UNKNOWN, "Analyze word script failed!")
+        return (None, comm.ERR_UNKNOWN, "Analyze word script failed!")
+    return (None, comm.ERR_UNKNOWN, "Analyze word script failed!")

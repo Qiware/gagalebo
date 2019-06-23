@@ -9,8 +9,9 @@ import MySQLdb
 from flask import Flask,request,render_template
 
 # 引用自定义模块
+import comm
+import word
 import video
-import errno
 import context
 
 ################################################################################
@@ -18,6 +19,21 @@ import context
 ctx = context.Context()
 
 app = Flask(__name__)
+
+################################################################################
+# 返回应答数据
+# @param
+#   code: 返回码
+#   message: 错误描述
+# @return
+#   data: 应答的JSON格式数据
+def GenResponse(code, message):
+    m = {}
+
+    m["code"] = code
+    m["message"] = message
+
+    return json.dumps(m)
 
 ################################################################################
 # 新建视频资源
@@ -33,38 +49,35 @@ app = Flask(__name__)
 # }
 @app.route("/gagalebo/v1/video", methods=['POST'])
 def CreateVideo():
-    v = video.Video()
-
     try:
         # 提取输入参数
         data = request.get_data()
 
         (v, code, message) = ParseCreateVideoParam(data)
-        if errno.OK != code:
+        if comm.OK != code:
             logging.error("[%s][%d] Parse create video parameter failed! code:%d message:%s"
                     % (__file__, sys._getframe().f_lineno, code, message))
-            return message
-
+            return GenResponse(code, message)
 
         # 分析字幕信息
         (w, code, message) = word.StatisticWord(ctx, v.words_script)
-        if errno.OK != code:
+        if comm.OK != code:
             logging.error("[%s][%d] Analyze word script failed! code:%d message:%s"
                     % (__file__, sys._getframe().f_lineno, code, message))
-            return message
+            return GenResponse(code, message)
         v.words = json.dumps(w)
 
         # 新建视频资源
-        (code, message) = video.CreateVideo(v)
-        if errno.OK != code:
+        (code, message) = video.CreateVideo(ctx, v)
+        if comm.OK != code:
             logging.error("[%s][%d] Create video failed! code:%d message:%s"
                     % (__file__, sys._getframe().f_lineno, code, message))
-            return message
+            return GenResponse(code, message)
         return "Ok"
     except Exception as e:
         logging.error("[%s][%d] Create video failed! e:%s"
                 % (__file__, sys._getframe().f_lineno, str(e)))
-        return str(e)
+        return GenResponse(comm.ERR_UNKNOWN, str(e))
 
 # 解析创建视频的参数
 # @param
@@ -73,6 +86,8 @@ def CreateVideo():
 #   code: 错误码
 #   message: 错误描述
 def ParseCreateVideoParam(data):
+    v = video.Video()
+
     try:
         jdata = json.loads(data)
 
@@ -81,7 +96,7 @@ def ParseCreateVideoParam(data):
         if not jdata.has_key("name_en") or (0 == len(jdata["name_en"])):
             logging.error("[%s][%d] Get name_en failed! data:%s"
                     % (__file__, sys._getframe().f_lineno, data))
-            return (None, errno.ERR_PARAM_INVALID, "Get name_en failed!")
+            return (None, comm.ERR_PARAM_INVALID, "Get name_en failed!")
 
         v.name_en = jdata["name_en"]
 
@@ -89,15 +104,15 @@ def ParseCreateVideoParam(data):
         if not jdata.has_key("name_ch") or (0 == len(jdata["name_ch"])):
             logging.error("[%s][%d] Get name_ch failed! data:%s"
                     % (__file__, sys._getframe().f_lineno, data))
-            return (None, errno.ERR_PARAM_INVALID, "Get name_ch failed!")
+            return (None, comm.ERR_PARAM_INVALID, "Get name_ch failed!")
 
-        v.name_en = jdata["name_ch"]
+        v.name_ch = jdata["name_ch"]
 
         # 缩略图URL
         if not jdata.has_key("poster") or (0 == len(jdata["poster"])):
             logging.error("[%s][%d] Get poster failed! data:%s"
                     % (__file__, sys._getframe().f_lineno, data))
-            return (None, errno.ERR_PARAM_INVALID, "Get poster failed!")
+            return (None, comm.ERR_PARAM_INVALID, "Get poster failed!")
 
         v.poster = jdata["poster"]
 
@@ -105,7 +120,7 @@ def ParseCreateVideoParam(data):
         if not jdata.has_key("duration") or (0 == jdata["duration"]):
             logging.error("[%s][%d] Get duration failed! data:%s"
                     % (__file__, sys._getframe().f_lineno, data))
-            return (None, errno.ERR_PARAM_INVALID, "Get duration failed!")
+            return (None, comm.ERR_PARAM_INVALID, "Get duration failed!")
 
         v.duration = jdata["duration"]
 
@@ -113,7 +128,7 @@ def ParseCreateVideoParam(data):
         if not jdata.has_key("url") or (0 == len(jdata["url"])):
             logging.error("[%s][%d] Get url failed! data:%s"
                     % (__file__, sys._getframe().f_lineno, data))
-            return (None, errno.ERR_PARAM_INVALID, "Get url failed!")
+            return (None, comm.ERR_PARAM_INVALID, "Get url failed!")
 
         v.url = jdata["url"]
 
@@ -121,7 +136,7 @@ def ParseCreateVideoParam(data):
         if not jdata.has_key("words_script") or (0 == len(jdata["words_script"])):
             logging.error("[%s][%d] Get words_script failed! data:%s"
                     % (__file__, sys._getframe().f_lineno, data))
-            return (None, errno.ERR_PARAM_INVALID, "Get words_script failed!")
+            return (None, comm.ERR_PARAM_INVALID, "Get words_script failed!")
 
         v.words_script = jdata["words_script"]
 
@@ -129,16 +144,16 @@ def ParseCreateVideoParam(data):
         if not jdata.has_key("definition") or (0 == len(jdata["definition"])):
             logging.error("[%s][%d] Get definition failed! data:%s"
                     % (__file__, sys._getframe().f_lineno, data))
-            return (None, errno.ERR_PARAM_INVALID, "Get definition failed!")
+            return (None, comm.ERR_PARAM_INVALID, "Get definition failed!")
 
         v.definition = jdata["definition"]
 
-        return (v, errno.OK, "Ok")
+        return (v, comm.OK, "Ok")
     except Exception as e:
-        logging.error("[%s][%d] Create video failed! e:%s"
-                % (__file__, sys._getframe().f_lineno, str(e)))
-        return (None, errno.ERR_UNKNOWN, str(e))
-    return (None, errno.ERR_UNKNOWN, "Parse create video parameter failed!")
+        logging.error("[%s][%d] Create video failed! data:%s e:%s"
+                % (__file__, sys._getframe().f_lineno, data, str(e)))
+        return (None, comm.ERR_UNKNOWN, str(e))
+    return (None, comm.ERR_UNKNOWN, "Parse create video parameter failed!")
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080)
