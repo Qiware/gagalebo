@@ -35,7 +35,7 @@ if __name__ == "__main__":
             if data["id"] == statistic.DATA_TYPE_WATCH_VIDEO: # 观看视频统计
                 if data.has_key("data"):
                     (code, message) = statistic.WatchVideoHandler(ctx, json.loads(data["data"]))
-                    if errno.OK != code:
+                    if comm.OK != code:
                         logging.error("[%s][%d] Watch video handler failed! code:%d errmsg:%s" 
                                 % (__file__, sys._getframe().f_lineno, code, message))
                     continue

@@ -4,7 +4,7 @@ import time
 import logging
 
 import keys
-import errno
+import comm
 
 ################################################################################
 # 获取视频信息
@@ -29,14 +29,14 @@ def GetVideoData(ctx, video_id):
         cur.close()
         db.close()
 
-        return (data, errno.OK, "Ok")
+        return (data, comm.OK, "Ok")
     except Exception, e:
         cur.close()
         db.close()
         logging.error("[%s][%d] Get data failed! video id:%d errmsg:%s"
                 % (__file__, sys._getframe().f_lineno, video_id, str(e)))
-        return (None, errno.ERR_UNKNOWN, str(e))
-    return (None, errno.ERR_DATA_NOT_FOUND, "Get video data failed")
+        return (None, comm.ERR_UNKNOWN, str(e))
+    return (None, comm.ERR_DATA_NOT_FOUND, "Get video data failed")
 
 ################################################################################
 # 更新视频历史
@@ -56,12 +56,12 @@ def UpdateVideoHistory(ctx, uid, video_id, play_time):
 
         rds.zset(key, video_id, play_time)
 
-        return (errno.OK, "Ok")
+        return (comm.OK, "Ok")
     except Exception, e:
         logging.error("[%s][%d] Update video history failed! uid:%d video_id:%d play_time:%d e:%s"
                 % (__file__, sys._getframe().f_lineno, uid, video_id, play_time, str(e)))
-        return (errno.ERR_UNKNOWN, str(e))
-    return (errno.ERR_UNKNOWN, "Update video history failed")
+        return (comm.ERR_UNKNOWN, str(e))
+    return (comm.ERR_UNKNOWN, "Update video history failed")
 
 ################################################################################
 # 获取用户累计学习视频数量(REDIS)
@@ -80,9 +80,9 @@ def GetVideoCountFromRds(ctx, uid):
 
         count = rds.zcard(key)
 
-        return (count, errno.OK, "Ok")
+        return (count, comm.OK, "Ok")
     except Exception, e:
         logging.error("[%s][%d] Get video count from redis failed! uid:%d e:%s"
                 % (__file__, sys._getframe().f_lineno, uid, str(e)))
-        return (0, errno.ERR_UNKNOWN, str(e))
-    return (0, errno.ERR_UNKNOWN, "Get video count from redis failed!")
+        return (0, comm.ERR_UNKNOWN, str(e))
+    return (0, comm.ERR_UNKNOWN, "Get video count from redis failed!")

@@ -6,7 +6,7 @@ import logging
 import MySQLdb
 
 import keys
-import errno
+import comm
 
 ################################################################################
 # 更新单词学习
@@ -27,13 +27,13 @@ def UpdateWordHistory(ctx, uid, word, num):
 
         rds.zadd(key, word, num)
 
-        return (errno.OK, "Ok")
+        return (comm.OK, "Ok")
     except Exception, e:
         logging.error("[%s][%d] Update word history failed! uid:%d word:%s e:%s"
                 % (__file__, sys._getframe().f_lineno, uid, word, str(e)))
-        return (errno.ERR_UNKNOWN, str(e))
+        return (comm.ERR_UNKNOWN, str(e))
 
-    return (errno.ERR_UNKNOWN, "Update word history failed")
+    return (comm.ERR_UNKNOWN, "Update word history failed")
 
 ################################################################################
 # 获取用户累计学习单词数量(REDIS)
@@ -53,10 +53,10 @@ def GetWordCountFromRds(ctx, uid):
 
         count = rds.zcard(key)
 
-        return (count, errno.OK, "Ok")
+        return (count, comm.OK, "Ok")
     except Exception, e:
         logging.error("[%s][%d] Get word count from redis failed! uid:%d e:%s"
                 % (__file__, sys._getframe().f_lineno, uid, str(e)))
-        return (0, errno.ERR_UNKNOWN, str(e))
+        return (0, comm.ERR_UNKNOWN, str(e))
 
-    return (0, errno.ERR_UNKNOWN, "Get word count from redis failed")
+    return (0, comm.ERR_UNKNOWN, "Get word count from redis failed")

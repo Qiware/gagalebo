@@ -23,17 +23,17 @@ def WatchVideoHandler(ctx, data):
         if not data.has_key("uid"):
             logging.error("[%s][%d] Get uid failed! data:%s"
                     % (__file__, sys._getframe().f_lineno, data))
-            return (errno.ERR_UID_INVALID, "Uid is invalid")
+            return (comm.ERR_UID_INVALID, "Uid is invalid")
 
         if not data.has_key("video_id"):
             logging.error("[%s][%d] Get video id failed! data:%s"
                     % (__file__, sys._getframe().f_lineno, data))
-            return (errno.ERR_VIDEO_ID_INVALID, "Video id is invalid")
+            return (comm.ERR_VIDEO_ID_INVALID, "Video id is invalid")
 
         if not data.has_key("play_time"):
             logging.error("[%s][%d] Get video play time failed! data:%s"
                     % (__file__, sys._getframe().f_lineno, data))
-            return (errno.ERR_VIDEO_ID_INVALID, "Video play time is invalid")
+            return (comm.ERR_VIDEO_ID_INVALID, "Video play time is invalid")
 
         # 获取视频信息
         (vdata, code, message) = video.GetVideoData(ctx, data["video_id"])
@@ -44,32 +44,32 @@ def WatchVideoHandler(ctx, data):
 
         # 更新观看视频历史
         (code, message) = video.UpdateVideoHistory(ctx, data["uid"], data["video_id"], data["play_time"])
-        if errno.OK != code:
+        if comm.OK != code:
             logging.error("[%s][%d] Update video history failed! video id:%d code:%d errmsg:%s"
                     % (__file__, sys._getframe().f_lineno, data["video_id"], code, message))
             return (code, message)
 
         # 更新单词学习统计
         (code, message) = UpdateWordCount(ctx, data["uid"], vdata)
-        if errno.OK != code:
+        if comm.OK != code:
             logging.error("[%s][%d] Update word count failed! uid:%d video id:%d code:%d errmsg:%s"
                     % (__file__, sys._getframe().f_lineno, data["uid"], data["video_id"], code, message))
             return (code, message)
 
         # 更新统计信息表
         (code, message) = UpdateStatistic(ctx, data["uid"], vdata["duration"])
-        if errno.OK != code:
+        if comm.OK != code:
             logging.error("[%s][%d] Update statistic table failed! uid:%d video id:%d code:%d errmsg:%s"
                     % (__file__, sys._getframe().f_lineno, data["uid"], data["video_id"], code, message))
             return (code, message)
 
-        return (errno.OK, "Ok")
+        return (comm.OK, "Ok")
     except Exception, e:
         logging.error("[%s][%d] Watch video handler failed! e:%s"
                 % (__file__, sys._getframe().f_lineno, str(e)))
-        return (errno.ERR_UNKNOWN, str(e))
+        return (comm.ERR_UNKNOWN, str(e))
 
-    return (errno.ERR_UNKNOWN, "Watch video handler failed")
+    return (comm.ERR_UNKNOWN, "Watch video handler failed")
 
 ################################################################################
 # 更新视频中的各单词学习统计次数
@@ -89,18 +89,18 @@ def UpdateWordCount(ctx, uid, vdata):
         for word in words.keys():
             num = words[word]
             (code, message) = word.UpdateWordHistory(ctx, uid, word, num)
-            if errno.OK != code:
+            if comm.OK != code:
                 logging.error("[%s][%d] Update word history failed! uid:%d word:%s code:%d errmsg:%s"
                         % (__file__, sys._getframe().f_lineno, uid, word, code, message))
                 return (code, message)
 
-        return (errno.OK, "Ok")
+        return (comm.OK, "Ok")
     except Exception, e:
         logging.error("[%s][%d] Update word count failed! uid:%d vdata:%s e:%s"
                 % (__file__, sys._getframe().f_lineno, uid, vdata, str(e)))
-        return (errno.ERR_UNKNOWN, str(e))
+        return (comm.ERR_UNKNOWN, str(e))
 
-    return (errno.ERR_UNKNOWN, "Update word count failed")
+    return (comm.ERR_UNKNOWN, "Update word count failed")
 
 ################################################################################
 # 更新统计信息表
@@ -115,14 +115,14 @@ def UpdateStatistic(ctx, uid, duration):
     try:
         # 获取累计学习视频数量
         (video_count, code, message) = video.GetVideoCountFromRds(ctx, uid)
-        if errno.OK != code:
+        if comm.OK != code:
             logging.error("[%s][%d] Get video count from redis failed! uid:%d code:%d errmsg:%s"
                     % (__file__, sys._getframe().f_lineno, uid, code, message))
             return (code, message)
 
         # 获取累计学习单词数量
         (word_count, code, message) = video.GetWordCountFromRds(ctx, uid)
-        if errno.OK != code:
+        if comm.OK != code:
             logging.error("[%s][%d] Get word count from redis failed! uid:%d code:%d errmsg:%s"
                     % (__file__, sys._getframe().f_lineno, uid, code, message))
             return (code, message)
@@ -165,8 +165,8 @@ def UpdateStatistic(ctx, uid, duration):
 
             cur.close()
             db.close()
-            return (errno.OK, "Ok")
+            return (comm.OK, "Ok")
     except Exception, e:
        logging.error("[%s][%d] Get data failed! video id:%d e:%s"
                % (__file__, sys._getframe().f_lineno, video_id, str(e)))
-       return (errno.ERR_UNKNOWN, str(e))
+       return (comm.ERR_UNKNOWN, str(e))
