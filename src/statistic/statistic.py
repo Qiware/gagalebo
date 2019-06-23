@@ -145,6 +145,7 @@ def UpdateStatistic(ctx, uid, duration):
                     VALUES(%d, %d, %d, %d, %d)''' % (uid, 0, 0, 0, 0)
                 cur.execute(sql) 
                 cur.commit()
+                db.commit()
 
                 cur.close()
                 db.close()

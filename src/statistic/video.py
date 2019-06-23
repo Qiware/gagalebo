@@ -26,6 +26,7 @@ def GetVideoData(ctx, video_id):
 
         data = cur.fetchone()
 
+        db.commit()
         cur.close()
         db.close()
 

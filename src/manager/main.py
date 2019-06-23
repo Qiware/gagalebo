@@ -73,7 +73,7 @@ def CreateVideo():
             logging.error("[%s][%d] Create video failed! code:%d message:%s"
                     % (__file__, sys._getframe().f_lineno, code, message))
             return GenResponse(code, message)
-        return "Ok"
+        return GenResponse(comm.OK, "Ok")
     except Exception as e:
         logging.error("[%s][%d] Create video failed! e:%s"
                 % (__file__, sys._getframe().f_lineno, str(e)))

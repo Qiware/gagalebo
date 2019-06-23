@@ -41,6 +41,7 @@ def CreateVideo(ctx, v):
     try:
         cur.execute(sql) 
 
+        db.commit()
         cur.close()
         db.close()
 
