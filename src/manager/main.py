@@ -79,6 +79,50 @@ def CreateVideo():
                 % (__file__, sys._getframe().f_lineno, str(e)))
         return GenResponse(comm.ERR_UNKNOWN, str(e))
 
+################################################################################
+# 更新视频资源
+# @protocol
+# {
+#   "name_en": "$name_en",              // 英文名称
+#   "name_ch": "$name_ch",              // 中文名称
+#   "poster": "$poster",                // 缩略图URL
+#   "duration": $duration,              // 视频时长
+#   "url": "$url",                      // 视频播放地址
+#   "words_script": "$words_script",    // 字幕
+#   "definition": "$definition",        // 视频清晰度(ex: 360p, 480p, 720p, 1080p...)
+# }
+@app.route("/gagalebo/v1/video/<int:video_id>", methods=['PUT'])
+def UpdateVideo(video_id):
+    try:
+        # 提取输入参数
+        data = request.get_data()
+
+        (v, code, message) = ParseCreateVideoParam(data)
+        if comm.OK != code:
+            logging.error("[%s][%d] Parse create video parameter failed! code:%d message:%s"
+                    % (__file__, sys._getframe().f_lineno, code, message))
+            return GenResponse(code, message)
+
+        # 分析字幕信息
+        (w, code, message) = word.StatisticWord(ctx, v.words_script)
+        if comm.OK != code:
+            logging.error("[%s][%d] Analyze word script failed! code:%d message:%s"
+                    % (__file__, sys._getframe().f_lineno, code, message))
+            return GenResponse(code, message)
+        v.words = json.dumps(w)
+
+        # 更新视频资源
+        (code, message) = video.UpdateVideo(ctx, video_id, v)
+        if comm.OK != code:
+            logging.error("[%s][%d] Update video failed! code:%d message:%s"
+                    % (__file__, sys._getframe().f_lineno, code, message))
+            return GenResponse(code, message)
+        return GenResponse(comm.OK, "Ok")
+    except Exception as e:
+        logging.error("[%s][%d] Update video failed! e:%s"
+                % (__file__, sys._getframe().f_lineno, str(e)))
+        return GenResponse(comm.ERR_UNKNOWN, str(e))
+
 # 解析创建视频的参数
 # @param
 #   data: 视频信息
@@ -156,4 +200,6 @@ def ParseCreateVideoParam(data):
     return (None, comm.ERR_UNKNOWN, "Parse create video parameter failed!")
 
 if __name__ == "__main__":
+    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
+
     app.run(debug=True, port=8080)

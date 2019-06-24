@@ -14,6 +14,8 @@ if __name__ == "__main__":
     # 初始化全局对象
     ctx = context.Context()
 
+    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
+
     while (True):
         try:
             rds = ctx.GetRedis()

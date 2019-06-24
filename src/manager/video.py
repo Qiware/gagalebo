@@ -36,7 +36,7 @@ def CreateVideo(ctx, v):
             video(name_en, name_ch, poster, duration, url, words_script, words, definition)
         VALUES('%s', '%s', '%s', %d, '%s', '%s', '%s', '%s')''' % (v.name_en, v.name_ch, v.poster, v.duration, v.url, v.words_script, v.words, v.definition)
 
-    logging.error("[%s][%d] sql:%s" % (__file__, sys._getframe().f_lineno, sql))
+    logging.debug("[%s][%d] sql:%s" % (__file__, sys._getframe().f_lineno, sql))
 
     try:
         cur.execute(sql) 
@@ -54,6 +54,51 @@ def CreateVideo(ctx, v):
         return (comm.ERR_UNKNOWN, str(e))
     return (comm.ERR_DATA_NOT_FOUND, "Create video data failed")
 
+################################################################################
+# 更新视频信息
+# @param
+#   ctx: 全局对象
+#   v: 视频对象
+# @return
+#   code: 错误码
+#   message: 错误描述
+def UpdateVideo(ctx, video_id, v):
+    db = ctx.GetDbConn()
+    cur = db.cursor()
+
+    sql = '''
+        UPDATE
+            video
+        SET
+            name_en='%s',
+            name_ch='%s',
+            poster='%s',
+            duration=%d,
+            url='%s',
+            words_script='%s',
+            words='%s',
+            definition='%s'
+        WHERE id=%d''' % (
+            v.name_en, v.name_ch, v.poster, v.duration,
+            v.url, v.words_script, v.words, v.definition, video_id)
+
+    logging.debug("[%s][%d] sql:%s" % (__file__, sys._getframe().f_lineno, sql))
+
+    try:
+        cur.execute(sql) 
+
+        db.commit()
+        cur.close()
+        db.close()
+
+        return (comm.OK, "Ok")
+    except Exception, e:
+        cur.close()
+        db.close()
+        logging.error("[%s][%d] Update video data failed! name(en):%s errmsg:%s"
+                % (__file__, sys._getframe().f_lineno, v.name_en, str(e)))
+        return (comm.ERR_UNKNOWN, str(e))
+    return (comm.ERR_DATA_NOT_FOUND, "Update video data failed")
 
 ################################################################################
 # 获取视频信息
