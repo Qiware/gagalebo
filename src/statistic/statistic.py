@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*- 
 
+import sys
+import comm
 import json
 import logging
 
+import word
 import video
 
 ################################################################################
@@ -57,7 +60,7 @@ def WatchVideoHandler(ctx, data):
             return (code, message)
 
         # 更新统计信息表
-        (code, message) = UpdateStatistic(ctx, data["uid"], vdata["duration"])
+        (code, message) = UpdateStatistic(ctx, data["uid"], vdata[comm.TAB_VIDEO_COL_DURATION])
         if comm.OK != code:
             logging.error("[%s][%d] Update statistic table failed! uid:%d video id:%d code:%d errmsg:%s"
                     % (__file__, sys._getframe().f_lineno, data["uid"], data["video_id"], code, message))
@@ -83,12 +86,12 @@ def WatchVideoHandler(ctx, data):
 def UpdateWordCount(ctx, uid, vdata):
     try:
         # 解析单词统计信息
-        words = json.loads(vdata[TAB_VIDEO_COL_WORDS])
+        words = json.loads(vdata[comm.TAB_VIDEO_COL_WORDS])
 
         # 更新各单词学习统计次数
-        for word in words.keys():
-            num = words[word]
-            (code, message) = word.UpdateWordHistory(ctx, uid, word, num)
+        for key in words.keys():
+            num = words[key]
+            (code, message) = word.UpdateWordHistory(ctx, uid, key, num)
             if comm.OK != code:
                 logging.error("[%s][%d] Update word history failed! uid:%d word:%s code:%d errmsg:%s"
                         % (__file__, sys._getframe().f_lineno, uid, word, code, message))
@@ -121,7 +124,7 @@ def UpdateStatistic(ctx, uid, duration):
             return (code, message)
 
         # 获取累计学习单词数量
-        (word_count, code, message) = video.GetWordCountFromRds(ctx, uid)
+        (word_count, code, message) = word.GetWordCountFromRds(ctx, uid)
         if comm.OK != code:
             logging.error("[%s][%d] Get word count from redis failed! uid:%d code:%d errmsg:%s"
                     % (__file__, sys._getframe().f_lineno, uid, code, message))
@@ -143,31 +146,42 @@ def UpdateStatistic(ctx, uid, duration):
                     INSERT INTO
                         statistic(uid, time, videos, words, score)
                     VALUES(%d, %d, %d, %d, %d)''' % (uid, 0, 0, 0, 0)
+
                 cur.execute(sql) 
-                cur.commit()
+
                 db.commit()
 
                 cur.close()
                 db.close()
                 continue
 
+            print('s:', s)
+
             # 更新统计信息
-            s["time"] += duration
-            s["videos"] = video_count
-            s["words"] = word_count
+            d = {}
+
+            d[comm.TAB_STATISTIC_COL_TIME] = s[comm.TAB_STATISTIC_COL_TIME] + duration
+            d[comm.TAB_STATISTIC_COL_VIDEOS] = video_count
+            d[comm.TAB_STATISTIC_COL_WORDS] = word_count
+
+            print('s:', s)
 
             sql = '''
                 UPDATE statistic
-                SET(time, videos, words)
-                VALUES(%d, %d, %d) WHERE uid=%d''' % (s["time"], s["videos"], s["words"], uid)
+                SET time=%d, videos=%d, words=%d
+                WHERE uid=%d''' % (
+                        d[comm.TAB_STATISTIC_COL_TIME],
+                        d[comm.TAB_STATISTIC_COL_VIDEOS],
+                        d[comm.TAB_STATISTIC_COL_WORDS], uid)
 
             cur.execute(sql) 
             db.commit()
 
             cur.close()
             db.close()
+
             return (comm.OK, "Ok")
     except Exception, e:
-       logging.error("[%s][%d] Get data failed! video id:%d e:%s"
-               % (__file__, sys._getframe().f_lineno, video_id, str(e)))
+       logging.error("[%s][%d] Get data failed! uid:%d e:%s"
+               % (__file__, sys._getframe().f_lineno, uid, str(e)))
        return (comm.ERR_UNKNOWN, str(e))

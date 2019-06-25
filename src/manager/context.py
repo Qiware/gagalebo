@@ -10,7 +10,7 @@ from DBUtils.PooledDB import PooledDB, SharedDBConnection
 # REDIS配置信息
 REDIS_HOST = "10.11.178.43"
 REDIS_PORT = 6379
-REDIS_PASSWD = ""
+REDIS_PASSWD = "12345678"
 REDIS_DB = 0
 
 # MYSQL配置信息

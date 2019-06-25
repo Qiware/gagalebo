@@ -6,6 +6,7 @@ import redis
 import logging
 import MySQLdb
 
+import comm
 import keys
 import context
 import statistic
@@ -23,7 +24,9 @@ if __name__ == "__main__":
             print(rds)
 
             # 侦听统计消息
-            m = rds.brpop(keys.RDS_KEY_STATISTIC_MQ, 0)
+            (mq, m) = rds.brpop(keys.RDS_KEY_STATISTIC_MQ, 0)
+
+            print(m)
 
             # 解析统计消息
             data = json.loads(m)
@@ -31,7 +34,6 @@ if __name__ == "__main__":
                 logging.error("[%s][%d] Get data type failed! m:%s" 
                         % (__file__, sys._getframe().f_lineno, m))
                 continue
-            exit(0)
 
             # 判断消息类型
             if data["id"] == statistic.DATA_TYPE_WATCH_VIDEO: # 观看视频统计

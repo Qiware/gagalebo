@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*- 
 
+import sys
 import json
 import time
 import logging
 import MySQLdb
 
-import keys
 import comm
+import keys
 
 ################################################################################
 # 更新单词学习
@@ -20,12 +21,12 @@ import comm
 #   message: 错误描述
 def UpdateWordHistory(ctx, uid, word, num):
 
-    key = print(keys.RDS_KEY_USER_WORD_HISTORY % uid)
+    key = keys.RDS_KEY_USER_WORD_HISTORY % (uid)
 
     try:
         rds = ctx.GetRedis()
 
-        rds.zadd(key, word, num)
+        rds.zadd(key, {word: num})
 
         return (comm.OK, "Ok")
     except Exception, e:
@@ -46,12 +47,14 @@ def UpdateWordHistory(ctx, uid, word, num):
 #   message: 错误描述
 def GetWordCountFromRds(ctx, uid):
 
-    key = print(keys.RDS_KEY_USER_WORD_HISTORY % uid)
+    key = keys.RDS_KEY_USER_WORD_HISTORY % uid
 
     try:
         rds = ctx.GetRedis()
 
         count = rds.zcard(key)
+
+        print("count", count)
 
         return (count, comm.OK, "Ok")
     except Exception, e:

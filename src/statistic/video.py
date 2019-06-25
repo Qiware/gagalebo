@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*- 
 
+import sys
 import time
 import logging
 
@@ -55,7 +56,9 @@ def UpdateVideoHistory(ctx, uid, video_id, play_time):
 
         key = keys.RDS_KEY_USER_VIDEO_HISTORY % (uid)
 
-        rds.zset(key, video_id, play_time)
+        print(key, video_id, play_time)
+
+        rds.zadd(key, {video_id: play_time})
 
         return (comm.OK, "Ok")
     except Exception, e:
