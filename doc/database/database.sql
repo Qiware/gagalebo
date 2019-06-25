@@ -3,9 +3,9 @@ SET SESSION FOREIGN_KEY_CHECKS=0;
 /* Drop Tables */
 
 DROP TABLE IF EXISTS account;
-DROP TABLE IF EXISTS video;
+/*DROP TABLE IF EXISTS video;
 DROP TABLE IF EXISTS word;
-DROP TABLE IF EXISTS statistic;
+DROP TABLE IF EXISTS statistic;*/
 
 
 /* Create Tables */
@@ -18,15 +18,16 @@ CREATE TABLE account
 	gender tinyint COMMENT '性别',
 	avatar varchar(1024) COMMENT '头像URL',
 	country varchar(32) COMMENT '国家',
+	province varchar(512) COMMENT '省份',
 	city varchar(512) COMMENT '城市',
-	wx_union_id varchar(64) COMMENT '微信用户ID',
+	wx_openid varchar(64) COMMENT '微信OPEN ID',
 	child_age tinyint COMMENT '孩子年龄',
 	child_gender tinyint COMMENT '孩子性别',
 	time_setting int COMMENT '学习时间设置',
 	create_time timestamp NOT NULL COMMENT '创建时间',
 	update_time timestamp DEFAULT NOW() NOT NULL COMMENT '修改时间',
 	PRIMARY KEY (id),
-	UNIQUE (wx_union_id)
+	UNIQUE (wx_openid)
 ) AUTO_INCREMENT = 10000 COMMENT = '账号信息表';
 
 
