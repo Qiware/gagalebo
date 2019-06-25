@@ -65,7 +65,16 @@ def CreateVideo():
             logging.error("[%s][%d] Analyze word script failed! code:%d message:%s"
                     % (__file__, sys._getframe().f_lineno, code, message))
             return GenResponse(code, message)
+
         v.words = json.dumps(w)
+
+        # 更新单词库资源
+        for key in w.keys():
+            (code, message) = word.AddWord(ctx, key, 0, "")
+            if comm.OK != code:
+                logging.error("[%s][%d] Add word failed! code:%d message:%s"
+                        % (__file__, sys._getframe().f_lineno, code, message))
+                return GenResponse(code, message)
 
         # 新建视频资源
         (code, message) = video.CreateVideo(ctx, v)
