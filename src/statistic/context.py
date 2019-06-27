@@ -7,18 +7,23 @@ import MySQLdb
 from DBUtils.PooledDB import PooledDB, SharedDBConnection
 
 # REDIS配置信息
-REDIS_HOST = "10.11.178.43"
+#REDIS_HOST = "10.11.178.43"
+#REDIS_HOST = "10.105.58.55"
+REDIS_HOST = "127.0.0.1"
 REDIS_PORT = 6379
-REDIS_PASSWD = "12345678"
+REDIS_PASSWD = ""
 REDIS_DB = 0
 
 # MYSQL配置信息
-MYSQL_HOST = "10.11.178.43"
+#MYSQL_HOST = "10.105.58.55"
+#MYSQL_HOST = "10.11.178.43"
+MYSQL_HOST = "127.0.0.1"
 MYSQL_PORT = 3306
-MYSQL_USER = "useradmin"
-MYSQL_PASSWD = "adminpassword"
-MYSQL_DB = "gagalebo"
-
+#MYSQL_USER = "useradmin"
+#MYSQL_PASSWD = "adminpassword"
+MYSQL_USER = "quack"
+MYSQL_PASSWD = "sYyxUgeCXxS8@)!^"
+MYSQL_DB = "quack"
 
 
 class Context():
