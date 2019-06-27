@@ -25,6 +25,7 @@ class Video():
 #   ctx: 全局对象
 #   v: 视频对象
 # @return
+#   id: 视频ID
 #   code: 错误码
 #   message: 错误描述
 def CreateVideo(ctx, v):
@@ -41,18 +42,20 @@ def CreateVideo(ctx, v):
     try:
         cur.execute(sql) 
 
+	vid = cur.lastrowid
+
         db.commit()
         cur.close()
         db.close()
 
-        return (comm.OK, "Ok")
+        return (vid, comm.OK, "Ok")
     except Exception, e:
         cur.close()
         db.close()
         logging.error("[%s][%d] Create video data failed! name(en):%s errmsg:%s"
                 % (__file__, sys._getframe().f_lineno, v.name_en, str(e)))
-        return (comm.ERR_UNKNOWN, str(e))
-    return (comm.ERR_DATA_NOT_FOUND, "Create video data failed")
+        return (0, comm.ERR_UNKNOWN, str(e))
+    return (0, comm.ERR_DATA_NOT_FOUND, "Create video data failed")
 
 ################################################################################
 # 更新视频信息
@@ -133,3 +136,25 @@ def GetVideoData(ctx, video_id):
     return (None, comm.ERR_DATA_NOT_FOUND, "Get video data failed")
 
 
+################################################################################
+# 将视频ID加入到集合(REDIS)
+# @param[in]
+#   ctx: 全局对象
+#   vid: 视频ID
+# @return
+#   code: 错误码
+#   message: 错误描述
+def AddVideoSet(ctx, vid):
+    key = keys.RDS_KEY_VIDEO_SET
+
+    try:
+        rds = ctx.GetRedis()
+
+        rds.add(key, vid)
+
+        return (comm.OK, "Ok")
+    except Exception, e:
+        logging.error("[%s][%d] Add video set failed! vid:%d e:%s"
+                % (__file__, sys._getframe().f_lineno, vid, str(e)))
+        return (comm.ERR_UNKNOWN, str(e))
+    return (comm.ERR_UNKNOWN, "Add video set failed!")

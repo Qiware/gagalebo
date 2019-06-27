@@ -77,9 +77,16 @@ def CreateVideo():
                 return GenResponse(code, message)
 
         # 新建视频资源
-        (code, message) = video.CreateVideo(ctx, v)
+        (vid, code, message) = video.CreateVideo(ctx, v)
         if comm.OK != code:
             logging.error("[%s][%d] Create video failed! code:%d message:%s"
+                    % (__file__, sys._getframe().f_lineno, code, message))
+            return GenResponse(code, message)
+
+        # 更新视频ID集合
+        (code, message) = video.AddVideoSet(ctx, vid)
+        if comm.OK != code:
+            logging.error("[%s][%d] Add video set failed! code:%d message:%s"
                     % (__file__, sys._getframe().f_lineno, code, message))
             return GenResponse(code, message)
         return GenResponse(comm.OK, "Ok")

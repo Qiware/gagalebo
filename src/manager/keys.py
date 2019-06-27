@@ -10,3 +10,6 @@ RDS_KEY_USER_VIDEO_HISTORY = "rds:key:uid:%d:video:history"
 
 # |LIST|统计信息消息队列
 RDS_KEY_STATISTIC_MQ = "rds:key:statistic:mq"
+
+# |SET|视频ID集合
+RDS_KEY_VIDEO_SET = "rds:key:video:set"
