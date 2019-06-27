@@ -1,0 +1,1 @@
+curl -X PUT "http://127.0.0.1:8080/gagalebo/v1/video/1" -d "{\"name_en\":\"LOVE\", \"name_ch\":\"LOVE\", \"poster\":\"www.baidu.com\",\"duration\":60,\"url\":\"www.ifeng.com\",\"words_script\":\"My name is xiao pig pig!\",\"definition\":\"360p\"}"
