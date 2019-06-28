@@ -15,6 +15,12 @@ import video
 import context
 
 ################################################################################
+logging.basicConfig(
+        level=logging.DEBUG,
+        filename='manager.log',
+        format='%(asctime)s : %(levelname)s : %(message)s')
+
+
 # 初始化全局对象
 ctx = context.Context()
 
@@ -216,6 +222,4 @@ def ParseCreateVideoParam(data):
     return (None, comm.ERR_UNKNOWN, "Parse create video parameter failed!")
 
 if __name__ == "__main__":
-    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
-
     app.run(debug=True, port=8080)
