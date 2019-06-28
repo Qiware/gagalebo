@@ -150,7 +150,7 @@ def AddVideoSet(ctx, vid):
     try:
         rds = ctx.GetRedis()
 
-        rds.add(key, vid)
+        rds.sadd(key, vid)
 
         return (comm.OK, "Ok")
     except Exception, e:
