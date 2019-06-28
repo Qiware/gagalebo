@@ -18,7 +18,7 @@ def GetAccountData(ctx, uid):
     db = ctx.GetDbConn()
     cur = db.cursor()
 
-    sql = "SELECT * FROM video WHERE id='%d'" % (video_id)
+    sql = "SELECT * FROM account WHERE id='%d'" % (uid)
 
     try:
         cur.execute(sql) 
@@ -33,7 +33,7 @@ def GetAccountData(ctx, uid):
     except Exception, e:
         cur.close()
         db.close()
-        logging.error("[%s][%d] Get account data failed! video id:%d errmsg:%s"
-                % (__file__, sys._getframe().f_lineno, video_id, str(e)))
+        logging.error("[%s][%d] Get account data failed! uid:%d errmsg:%s"
+                % (__file__, sys._getframe().f_lineno, uid, str(e)))
         return (None, comm.ERR_UNKNOWN, str(e))
     return (None, comm.ERR_DATA_NOT_FOUND, "Get account data failed")

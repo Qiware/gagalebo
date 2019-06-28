@@ -5,6 +5,7 @@ import comm
 import json
 import logging
 
+import keys
 import word
 import video
 import account
@@ -54,7 +55,7 @@ def WatchVideoHandler(ctx, data):
             return (code, message)
 
         # 更新学习天数
-        (code, message) = AddStudyDate(ctx, data["play_time"])
+        (code, message) = AddStudyDate(ctx, data["uid"], data["play_time"])
         if comm.OK != code:
             logging.error("[%s][%d] Update study days failed! video id:%d code:%d errmsg:%s"
                     % (__file__, sys._getframe().f_lineno, data["video_id"], code, message))
@@ -130,6 +131,12 @@ def UpdateStatistic(ctx, uid, duration):
             logging.error("[%s][%d] Get user failed! uid:%d code:%d errmsg:%s"
                     % (__file__, sys._getframe().f_lineno, uid, code, message))
             return (code, message)
+	elif user is None:
+            logging.error("[%s][%d] User is not found! uid:%d"
+                    % (__file__, sys._getframe().f_lineno, uid, code, message))
+            return (comm.ERR_DATA_NOT_FOUND, "User not found")
+
+	print(user)
 
         # 获取累计学习视频数量
         (video_count, code, message) = video.GetVideoCountFromRds(ctx, uid)
@@ -181,7 +188,7 @@ def UpdateStatistic(ctx, uid, duration):
 
             # 更新统计信息
             total_tm = s[comm.TAB_STATISTIC_COL_TIME] + duration
-            score = int((tm / days) * user[comm.TAB_ACCOUNT_COL_TIME_SETTING])
+            score = int((total_tm / days) * user[comm.TAB_ACCOUNT_COL_TIME_SETTING])
 
             sql = '''
                 UPDATE statistic
@@ -196,7 +203,7 @@ def UpdateStatistic(ctx, uid, duration):
 
             return (comm.OK, "Ok")
     except Exception, e:
-       logging.error("[%s][%d] Get data failed! uid:%d e:%s"
+       logging.error("[%s][%d] Update statistic data failed! uid:%d e:%s"
                % (__file__, sys._getframe().f_lineno, uid, str(e)))
        return (comm.ERR_UNKNOWN, str(e))
 
