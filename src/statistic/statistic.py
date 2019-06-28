@@ -52,6 +52,13 @@ def WatchVideoHandler(ctx, data):
                     % (__file__, sys._getframe().f_lineno, data["video_id"], code, message))
             return (code, message)
 
+        # 更新学习天数
+        (code, message) = AddStudyDate(ctx, data["play_time"])
+        if comm.OK != code:
+            logging.error("[%s][%d] Update study days failed! video id:%d code:%d errmsg:%s"
+                    % (__file__, sys._getframe().f_lineno, data["video_id"], code, message))
+            return (code, message)
+
         # 更新单词学习统计
         (code, message) = UpdateWordCount(ctx, data["uid"], vdata)
         if comm.OK != code:
@@ -130,6 +137,13 @@ def UpdateStatistic(ctx, uid, duration):
                     % (__file__, sys._getframe().f_lineno, uid, code, message))
             return (code, message)
 
+        # 获取累计学习天数
+        (days, code, message) = GetStudyDaysFromRds(ctx, uid)
+        if comm.OK != code:
+            logging.error("[%s][%d] Get days from redis failed! uid:%d code:%d errmsg:%s"
+                    % (__file__, sys._getframe().f_lineno, uid, code, message))
+            return (code, message)
+
         while (True):
             db = ctx.GetDbConn()
             cur = db.cursor()
@@ -163,16 +177,19 @@ def UpdateStatistic(ctx, uid, duration):
             d[comm.TAB_STATISTIC_COL_TIME] = s[comm.TAB_STATISTIC_COL_TIME] + duration
             d[comm.TAB_STATISTIC_COL_VIDEOS] = video_count
             d[comm.TAB_STATISTIC_COL_WORDS] = word_count
+            d[comm.TAB_STATISTIC_COL_DAYS] = days
 
             print('s:', s)
 
             sql = '''
                 UPDATE statistic
-                SET time=%d, videos=%d, words=%d
+                SET time=%d, videos=%d, words=%d, days=%d
                 WHERE uid=%d''' % (
                         d[comm.TAB_STATISTIC_COL_TIME],
                         d[comm.TAB_STATISTIC_COL_VIDEOS],
-                        d[comm.TAB_STATISTIC_COL_WORDS], uid)
+                        d[comm.TAB_STATISTIC_COL_WORDS],
+                        d[comm.TAB_STATISTIC_COL_DAYS],
+                        uid)
 
             cur.execute(sql) 
             db.commit()
@@ -185,3 +202,57 @@ def UpdateStatistic(ctx, uid, duration):
        logging.error("[%s][%d] Get data failed! uid:%d e:%s"
                % (__file__, sys._getframe().f_lineno, uid, str(e)))
        return (comm.ERR_UNKNOWN, str(e))
+
+################################################################################
+# 添加学习日期
+# @param[in]
+#   ctx: 全局对象
+#   uid: 用户ID
+#   tm: 观看视频时间戳
+# @return
+#   code: 错误码
+#   message: 错误描述
+def AddStudyDate(ctx, uid, tm):
+
+    key = keys.RDS_KEY_USER_STUDY_DATE_SET % (uid)
+
+    try:
+        rds = ctx.GetRedis()
+
+        date = tm - tm%86400
+
+        rds.sadd(key, date)
+
+        return (comm.OK, "Ok")
+    except Exception, e:
+        logging.error("[%s][%d] Update study days failed! uid:%d word:%s e:%s"
+                % (__file__, sys._getframe().f_lineno, uid, word, str(e)))
+        return (comm.ERR_UNKNOWN, str(e))
+
+    return (comm.ERR_UNKNOWN, "Update word history failed")
+
+################################################################################
+# 获取用户累计学习天数
+# @param[in]
+#   ctx: 全局对象
+#   uid: 用户ID
+# @return
+#   days: 学习天数
+#   code: 错误码
+#   message: 错误描述
+def GetStudyDaysFromRds(ctx, uid):
+
+    key = keys.RDS_KEY_USER_STUDY_DATE_SET % (uid)
+
+    try:
+        rds = ctx.GetRedis()
+
+        days = rds.scard(key)
+
+        return (days, comm.OK, "Ok")
+    except Exception, e:
+        logging.error("[%s][%d] Get study days from redis failed! uid:%d e:%s"
+                % (__file__, sys._getframe().f_lineno, uid, str(e)))
+        return (0, comm.ERR_UNKNOWN, str(e))
+
+    return (0, comm.ERR_UNKNOWN, "Get study days from redis failed")
