@@ -7,6 +7,7 @@ import logging
 
 import word
 import video
+import account
 
 ################################################################################
 # 统计数据类型
@@ -123,6 +124,13 @@ def UpdateWordCount(ctx, uid, vdata):
 #   message: 错误描述
 def UpdateStatistic(ctx, uid, duration):
     try:
+        # 获取账号信息
+        (user, code, message) = account.GetAccountData(ctx, uid)
+        if comm.OK != code:
+            logging.error("[%s][%d] Get user failed! uid:%d code:%d errmsg:%s"
+                    % (__file__, sys._getframe().f_lineno, uid, code, message))
+            return (code, message)
+
         # 获取累计学习视频数量
         (video_count, code, message) = video.GetVideoCountFromRds(ctx, uid)
         if comm.OK != code:
@@ -158,8 +166,8 @@ def UpdateStatistic(ctx, uid, duration):
                 # 新建统计对象
                 sql ='''
                     INSERT INTO
-                        statistic(uid, time, videos, words, score)
-                    VALUES(%d, %d, %d, %d, %d)''' % (uid, 0, 0, 0, 0)
+                        statistic(uid, time, videos, words, days, score)
+                    VALUES(%d, %d, %d, %d, %d)''' % (uid, 0, 0, 0, 0, 0)
 
                 cur.execute(sql) 
 
@@ -172,24 +180,13 @@ def UpdateStatistic(ctx, uid, duration):
             print('s:', s)
 
             # 更新统计信息
-            d = {}
-
-            d[comm.TAB_STATISTIC_COL_TIME] = s[comm.TAB_STATISTIC_COL_TIME] + duration
-            d[comm.TAB_STATISTIC_COL_VIDEOS] = video_count
-            d[comm.TAB_STATISTIC_COL_WORDS] = word_count
-            d[comm.TAB_STATISTIC_COL_DAYS] = days
-
-            print('s:', s)
+            total_tm = s[comm.TAB_STATISTIC_COL_TIME] + duration
+            score = int((tm / days) * user[comm.TAB_ACCOUNT_COL_TIME_SETTING])
 
             sql = '''
                 UPDATE statistic
-                SET time=%d, videos=%d, words=%d, days=%d
-                WHERE uid=%d''' % (
-                        d[comm.TAB_STATISTIC_COL_TIME],
-                        d[comm.TAB_STATISTIC_COL_VIDEOS],
-                        d[comm.TAB_STATISTIC_COL_WORDS],
-                        d[comm.TAB_STATISTIC_COL_DAYS],
-                        uid)
+                SET time=%d, videos=%d, words=%d, days=%d, score=%d
+                WHERE uid=%d''' % (total_tm, video_count, word_count, days, score, uid)
 
             cur.execute(sql) 
             db.commit()
