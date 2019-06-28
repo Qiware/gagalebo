@@ -188,7 +188,9 @@ def UpdateStatistic(ctx, uid, duration):
 
             # 更新统计信息
             total_tm = s[comm.TAB_STATISTIC_COL_TIME] + duration
-            score = int((total_tm / days) * user[comm.TAB_ACCOUNT_COL_TIME_SETTING])
+            score = int(100 * total_tm * 1.0 / (days * user[comm.TAB_ACCOUNT_COL_TIME_SETTING] * 60))
+            if score > 100:
+                score = 100
 
             sql = '''
                 UPDATE statistic
