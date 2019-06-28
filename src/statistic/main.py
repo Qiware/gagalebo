@@ -29,7 +29,7 @@ if __name__ == "__main__":
             # 侦听统计消息
             (mq, m) = rds.brpop(keys.RDS_KEY_STATISTIC_MQ, 0)
 
-            print(m)
+            logging.debug("Recv data:%s", m)
 
             # 解析统计消息
             data = json.loads(m)
