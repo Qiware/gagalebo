@@ -222,4 +222,4 @@ def ParseCreateVideoParam(data):
     return (None, comm.ERR_UNKNOWN, "Parse create video parameter failed!")
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8080)
+    app.run(debug=False, port=18080)

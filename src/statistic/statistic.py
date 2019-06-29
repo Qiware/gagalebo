@@ -136,7 +136,7 @@ def UpdateStatistic(ctx, uid, duration):
                     % (__file__, sys._getframe().f_lineno, uid, code, message))
             return (comm.ERR_DATA_NOT_FOUND, "User not found")
 
-	print(user)
+        logging.debug("[%s][%d] Get user data! user:%s" % (__file__, sys._getframe().f_lineno, user))
 
         # 获取累计学习视频数量
         (video_count, code, message) = video.GetVideoCountFromRds(ctx, uid)
@@ -145,6 +145,8 @@ def UpdateStatistic(ctx, uid, duration):
                     % (__file__, sys._getframe().f_lineno, uid, code, message))
             return (code, message)
 
+        logging.debug("[%s][%d] Get video count! uid:%d video count:%d" % (__file__, sys._getframe().f_lineno, uid, video_count))
+
         # 获取累计学习单词数量
         (word_count, code, message) = word.GetWordCountFromRds(ctx, uid)
         if comm.OK != code:
@@ -152,12 +154,16 @@ def UpdateStatistic(ctx, uid, duration):
                     % (__file__, sys._getframe().f_lineno, uid, code, message))
             return (code, message)
 
+        logging.debug("[%s][%d] Get word count! uid:%d word count:%d" % (__file__, sys._getframe().f_lineno, uid, word_count))
+
         # 获取累计学习天数
         (days, code, message) = GetStudyDaysFromRds(ctx, uid)
         if comm.OK != code:
             logging.error("[%s][%d] Get days from redis failed! uid:%d code:%d errmsg:%s"
                     % (__file__, sys._getframe().f_lineno, uid, code, message))
             return (code, message)
+
+        logging.debug("[%s][%d] Get days! uid:%d days:%d" % (__file__, sys._getframe().f_lineno, uid, days))
 
         while (True):
             db = ctx.GetDbConn()
@@ -174,7 +180,7 @@ def UpdateStatistic(ctx, uid, duration):
                 sql ='''
                     INSERT INTO
                         statistic(uid, time, videos, words, days, score)
-                    VALUES(%d, %d, %d, %d, %d)''' % (uid, 0, 0, 0, 0, 0)
+                    VALUES(%d, %d, %d, %d, %d, %d)''' % (uid, 0, 0, 0, 0, 0)
 
                 cur.execute(sql) 
 
