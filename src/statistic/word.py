@@ -27,7 +27,7 @@ def UpdateWordHistory(ctx, uid, word, num):
         rds = ctx.GetRedis()
 
         #rds.zadd(key, {word: num})
-        rds.zincrby(key, word, num)
+        rds.zincrby(key, value=word, amount=num)
 
         return (comm.OK, "Ok")
     except Exception, e:
