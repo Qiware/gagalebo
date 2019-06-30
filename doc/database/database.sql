@@ -70,6 +70,7 @@ CREATE TABLE statistic
 	time bigint unsigned DEFAULT 0 NOT NULL COMMENT '累计学习时长',
 	videos bigint unsigned DEFAULT 0 NOT NULL COMMENT '累计学习视频数',
 	words bigint unsigned DEFAULT 0 NOT NULL COMMENT '累计学习单词数',
+	days bigint unsigned DEFAULT 0 NOT NULL COMMENT '累计学习天数',
 	score int unsigned DEFAULT 0 NOT NULL COMMENT '综合评分(整数)',
 	PRIMARY KEY (id),
 	UNIQUE (uid)
